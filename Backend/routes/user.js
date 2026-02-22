@@ -1,10 +1,12 @@
 const express = require("express");
 const zod = require("zod");
 const jwt = require("jsonwebtoken");
+const {authMiddleware} = require("../middleware");
 const { User } = require("../db");
 const router = express.Router();
 require('dotenv').config();
 
+//SIGN-UP Route with ZOD input validation
 const signupSchema = zod.object({
     username: zod.string(),
     password: zod.string(),
@@ -45,6 +47,7 @@ router.post("/signup", async (req, res) => {
     });
 });
 
+//SIGN-IN Route with ZOD input validation
 const signinSchema = zod.object({
     username: zod.string(),
     password: zod.string()
@@ -78,6 +81,28 @@ router.post("/signin", async (req, res) => {
     res.status(411).json({
         message: "Error while logging in"
     })
+})
+
+//Update (password, firstName, lastName) Route with zod input validation
+const updateSchema = zod.object({
+    password: zod.string().optional(),
+    firstName: zod.string().optional(),
+    lastName: zod.string().optional()
+})
+
+router.put("/", authMiddleware, async (req, res) => {
+    const {success} = updateSchema.safeParse(req.body)
+    if(!success){
+        res.status(411).json({
+            message: "Error while updating information"
+        })
+    }
+
+    await User.updateOne({_id: req.userid}, req.body);
+
+    res.json({
+        message: "Updated successfully"
+    });
 })
 
 module.exports = router;
