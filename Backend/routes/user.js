@@ -2,7 +2,7 @@ const express = require("express");
 const zod = require("zod");
 const jwt = require("jsonwebtoken");
 const {authMiddleware} = require("../middleware");
-const { User } = require("../db");
+const { User, Account } = require("../db");
 const router = express.Router();
 require('dotenv').config();
 
@@ -28,9 +28,8 @@ router.post("/signup", async (req, res) => {
     const user = User.findOne({
         username: body.username
     })
-     const userId = user._id;
 
-    if(userId) {
+    if(user._id) {
         return res.json({
             message: "User already exists"
         })
@@ -40,7 +39,7 @@ router.post("/signup", async (req, res) => {
 
     //----- CREATE new Account -----
     await Account.create({
-        userId,
+        userId: dbUser._id,
         balance: 1 + Math.random() * 10000
     });
     //-----  -----
@@ -78,7 +77,7 @@ router.post("/signin", async (req, res) => {
     if(user) {
         const token = jwt.sign({
             userId: user._id
-        }, JWT_SECRET);
+        }, process.env.JWT_SECRET);
 
         res.json({
             token
