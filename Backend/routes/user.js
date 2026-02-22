@@ -28,14 +28,22 @@ router.post("/signup", async (req, res) => {
     const user = User.findOne({
         username: body.username
     })
+     const userId = user._id;
 
-    if(user._id) {
+    if(userId) {
         return res.json({
             message: "User already exists"
         })
     }
 
     const dbUser = await User.create(body);
+
+    //----- CREATE new Account -----
+    await Account.create({
+        userId,
+        balance: 1 + Math.random() * 10000
+    });
+    //-----  -----
 
     const token = jwt.sign({
         userId: dbUser._id
@@ -98,7 +106,7 @@ router.put("/", authMiddleware, async (req, res) => {
         })
     }
 
-    await User.updateOne({_id: req.userid}, req.body);
+    await User.updateOne({_id: req.userId}, req.body);
 
     res.json({
         message: "Updated successfully"
