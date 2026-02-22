@@ -14,7 +14,9 @@ const signupSchema = zod.object({
 
 router.post("/signup", async (req, res) => {
     const body = req.body;
-    const {success} = signupSchema.safeParse(req.body);
+    const {success} = signupSchema.safeParse(req.body); // {success} Because this returns an object
+    //const obj = signupSchema.safeParse(req.body);
+    //if(!obj.success) {}
     if(!success) {
         return res.json({
             message: "Email already taken / Incorrect inputs"
@@ -49,7 +51,7 @@ const signinSchema = zod.object({
 });
 
 router.post("/signin", async (req, res) => {
-    const success = signinSchema.safeParse(req.body);
+    const {success} = signinSchema.safeParse(req.body);
 
     if(!success) {
         return res.status(411).json({
